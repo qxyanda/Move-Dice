@@ -258,16 +258,8 @@ module move_bet::dice_game {
     public entry fun bet_complete(dice:&mut Dice,pool: &mut Pool,ctx: &mut TxContext)
     {
         assert!((dice.reward-dice.amount)>0,EInvalidNumber);
-        let result_value=dice_roll(uid_to_bytes(&dice.id));
-        if(result_value<=pool.bias)
-        {
-            dice.win=false;
-        }
-        else
-        {
-            dice.win=result_value>dice.bet_number-pool.bias;
-            dice.random_number=result_value;
-        };
+        dice.random_number=dice_roll(uid_to_bytes(&dice.id));
+        dice.win=dice.random_number>(dice.bet_number+pool.bias);
         let fee = (ROLL_MAX*dice.amount/(ROLL_MAX-dice.bet_number)-dice.amount)*pool.premium_rate/100;
         pool.premium=pool.premium+fee/SCALER;
         pool.net_value=(get_amounts(pool)-pool.premium*SCALER)/pool.stake;
